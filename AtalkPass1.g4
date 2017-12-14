@@ -1,17 +1,28 @@
-grammar Atalk;
+grammar AtalkPass1;
 @members{
 	void print(String str){
         System.out.println(str);
     }
 	void beginScope() {
-    	int offset = 0;
-    	if(SymbolTable.top != null)
-        	offset = SymbolTable.top.getOffset(Register.SP);
-      SymbolTable.push(new SymbolTable());
-      SymbolTable.top.setOffset(Register.SP, offset);
+    	int localOffset = 0;
+			int globalOffset = 0;
+    	if(SymbolTable.top != null){
+        	localOffset = SymbolTable.top.getOffset(Register.SP);
+					globalOffset = SymbolTable.top.getOffset(Register.GP);
+
+			}
+	    SymbolTable.push(new SymbolTable(SymbolTable.top));
+      SymbolTable.top.setOffset(Register.SP, localOffset);
+			SymbolTable.top.setOffset(Register.GP, globalOffset);
     }
 	void endScope(){
-  		SymbolTable.pop();
+		if(SymbolTable.top.getPreSymbolTable() != null) {
+        SymbolTable.top.getPreSymbolTable().setOffset(
+          Register.GP,
+        	SymbolTable.top.getOffset(Register.GP)
+          );
+        }
+        SymbolTable.pop();
 	}
 }
 program:
@@ -20,6 +31,7 @@ program:
 			print("At least one actor should be defined");
 		else if(Tools.codeIsValid)
 			Tools.printMessages();
+		print("Pass1 finished----------------------------------------------------------------");
 		}
 		
 	;

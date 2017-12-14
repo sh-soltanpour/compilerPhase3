@@ -50,8 +50,10 @@ public class SymbolTable {
 	public void put(SymbolTableItem item) throws ItemAlreadyExistsException {
 		if(items.containsKey(item.getKey()))
 			throw new ItemAlreadyExistsException();
+		// System.out.println("itesm put");
 		items.put(item.getKey(), item);
-
+		SymbolTableItem myItem = items.get(item.getKey());
+		// System.out.println(myItem);
 		if(item instanceof SymbolTableVariableItemBase) {
 			SymbolTableVariableItemBase castedItem = (SymbolTableVariableItemBase) item;
 			int oldOffset = getOffset(castedItem.getBaseRegister());
@@ -84,19 +86,29 @@ public class SymbolTable {
 	}
 
 	public SymbolTableItem get(String key) {
+		System.out.println("Start");
+		for (String mykey : items.keySet()) {
+			System.out.println(mykey);
+		}
+		System.out.println("Finished");
 		SymbolTableItem value = items.get(key);
-
-		if(value == null && pre != null)
+		if(value == null && pre != null){
+			SymbolTableItem returnedValue = pre.get(key);
+			System.out.println("REturnedValue");
+			System.out.println(returnedValue);
 			return pre.get(key);
+		}
 
-		if(value.useMustBeComesAfterDef() &&
-				SymbolTable.definitionsCount <= value.getDefinitionNumber()) {
+		if(value != null && value.useMustBeComesAfterDef() &&
+				SymbolTable.definitionsCount < value.getDefinitionNumber()) {
+			System.out.println("INja");
+			System.out.println(SymbolTable.definitionsCount);
+			System.out.println(value.getDefinitionNumber());
 			if(pre != null) 
 				return pre.get(key);
 			else 
 				return null;
 		}
-
 		return value;
 	}
 
