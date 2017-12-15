@@ -1,4 +1,5 @@
 Atalk*.java
+!Atalk.java
 *.class
 *.tokens
 /.antlr
