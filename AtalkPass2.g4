@@ -61,58 +61,61 @@ stm_break: 'break' NL;
 
 stm_assignment: expr NL;
 
-expr: expr_assign;
+expr returns [Type return_type]: expr_assign{$return_type = $expr_assign.return_type;};
 
-expr_assign: expr_or '=' expr_assign | expr_or;
+expr_assign returns [Type return_type]: expr_or '=' expr_assign{$return_type = Tools.expr_assign_typeCheck($expr_or.return_type , $expr_assign.return_type);} | expr_or{$return_type = $expr_or.return_type;};
 
-expr_or: expr_and expr_or_tmp;
+expr_or returns [Type return_type]: expr_and expr_or_tmp{$return_type = Tools.expr_or_typeCheck($expr_and.return_type , $expr_or_tmp.return_type);};
 
-expr_or_tmp: 'or' expr_and expr_or_tmp |;
+expr_or_tmp returns [Type return_type]: 'or' expr_and expr_or_tmp{$return_type = Tools.expr_or_tmp_typeCheck($expr_and.return_type , $expr_or_tmp.return_type);} |{$return_type = null;};
 
-expr_and: expr_eq expr_and_tmp;
+expr_and returns [Type return_type]: expr_eq expr_and_tmp{$return_type = Tools.expr_and_typeCheck($expr_eq.return_type , $expr_and_tmp.return_type);};
 
-expr_and_tmp: 'and' expr_eq expr_and_tmp |;
+expr_and_tmp returns [Type return_type]: 'and' expr_eq expr_and_tmp{$return_type = Tools.expr_and_tmp_typeCheck($expr_eq.return_type , $expr_and_tmp.return_type);} |{$return_type = null;};
 
-expr_eq: expr_cmp expr_eq_tmp;
+expr_eq returns [Type return_type]: expr_cmp expr_eq_tmp{$return_type = Tools.expr_eq_typeCheck($expr_cmp.return_type , $expr_eq_tmp.return_type);};
 
-expr_eq_tmp: ('==' | '<>') expr_cmp expr_eq_tmp |;
+expr_eq_tmp returns [Type return_type]: ('==' | '<>') expr_cmp expr_eq_tmp{$return_type = Tools.expr_eq_tmp_typeCheck($expr_cmp.return_type , $expr_eq_tmp.return_type);} |{$return_type = null;};
 
-expr_cmp: expr_add expr_cmp_tmp;
+expr_cmp returns [Type return_type]: expr_add expr_cmp_tmp{$return_type = Tools.expr_cmp_typeCheck($expr_add.return_type , $expr_cmp_tmp.return_type);};
 
-expr_cmp_tmp: ('<' | '>') expr_add expr_cmp_tmp |;
+expr_cmp_tmp returns [Type return_type]: ('<' | '>') expr_add expr_cmp_tmp{$return_type = Tools.expr_cmp_tmp_typeCheck($expr_add.return_type, $expr_cmp_tmp.return_type);} |{$return_type = null;};
 
-expr_add: expr_mult expr_add_tmp;
+expr_add returns [Type return_type]: expr_mult expr_add_tmp {$return_type = Tools.expr_add_typeCheck($expr_mult.return_type, $expr_add_tmp.return_type);};
 
-expr_add_tmp: ('+' | '-') expr_mult expr_add_tmp |;
+expr_add_tmp returns [Type return_type]: ('+' | '-') expr_mult expr_add_tmp {$return_type = Tools.expr_add_tmp_typeCheck();} |{$return_type = null;};
 
-expr_mult: expr_un expr_mult_tmp;
+expr_mult returns [Type return_type]: expr_un expr_mult_tmp {$return_type = Tools.expr_mult_typeCheck($expr_un.return_type, $expr_mult_tmp.return_type);};
 
-expr_mult_tmp: ('*' | '/') expr_un expr_mult_tmp |;
+expr_mult_tmp returns [Type return_type]: ('*' | '/') expr_un expr_mult_tmp{$return_type=Tools.expr_mult_tmp_typeCheck($expr_un.return_type,$expr_mult_tmp.return_type);} |{$return_type = null;};
 
-expr_un: ('not' | '-') expr_un | expr_mem;
+expr_un returns [Type return_type]: ('not' | '-') expr_un{$return_type = Tools.expr_un_typeCheck($expr_un.return_type);} | expr_mem{$return_type = $expr_mem.return_type;};
 
-expr_mem: expr_other expr_mem_tmp;
+expr_mem returns[Type return_type]: expr_other expr_mem_tmp{$return_type = Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count);};
 
-expr_mem_tmp: '[' expr ']' expr_mem_tmp |;
+expr_mem_tmp returns [int count]: '[' expr1=expr ']' expr2=expr_mem_tmp 
+{$count = $expr2.count + 1;}
+| {$count = 0;};
 
-expr_other:
-	CONST_NUM
-	| CONST_CHAR
-	| CONST_STR
+expr_other returns [Type return_type]:
+	CONST_NUM {$return_type = IntType.getInstance();}
+	| CONST_CHAR {$return_type = CharType.getInstance();}
+	| str=CONST_STR	 {$return_type = new ArrayType(CharType.getInstance(),$str.text.length()-2 );}
 	| id=ID
   { 
             SymbolTableItem item = SymbolTable.top.get($id.text);
             if(item == null) {
-								
+								$return_type = NoType.getInstance();
                 print($id.line + ") Item " + $id.text + " doesn't exist.");
             }
             else {
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
                 print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
-            }
+								$return_type = var.getVariable().getType();
+						}
   } 
-	| '{' expr (',' expr)* '}'
-	| 'read' '(' CONST_NUM ')'
+	| '{' expr (',' expr)* '}' 
+	| 'read' '(' num=CONST_NUM ')' {$return_type = new ArrayType(CharType.getInstance(),Integer.parseInt($num.text));}
 	| '(' expr ')';
 
 CONST_NUM: [0-9]+;

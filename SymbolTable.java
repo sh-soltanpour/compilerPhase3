@@ -86,24 +86,24 @@ public class SymbolTable {
 	}
 
 	public SymbolTableItem get(String key) {
-		System.out.println("Start");
-		for (String mykey : items.keySet()) {
-			System.out.println(mykey);
-		}
-		System.out.println("Finished");
+		// System.out.println("Start");
+		// for (String mykey : items.keySet()) {
+		// 	System.out.println(mykey);
+		// }
+		// System.out.println("Finished");
 		SymbolTableItem value = items.get(key);
 		if(value == null && pre != null){
 			SymbolTableItem returnedValue = pre.get(key);
-			System.out.println("REturnedValue");
-			System.out.println(returnedValue);
+			// System.out.println("REturnedValue");
+			// System.out.println(returnedValue);
 			return pre.get(key);
 		}
 
 		if(value != null && value.useMustBeComesAfterDef() &&
 				SymbolTable.definitionsCount < value.getDefinitionNumber()) {
-			System.out.println("INja");
-			System.out.println(SymbolTable.definitionsCount);
-			System.out.println(value.getDefinitionNumber());
+			// System.out.println("INja");
+			// System.out.println(SymbolTable.definitionsCount);
+			// System.out.println(value.getDefinitionNumber());
 			if(pre != null) 
 				return pre.get(key);
 			else 

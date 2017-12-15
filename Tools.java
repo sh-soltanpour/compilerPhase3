@@ -4,6 +4,7 @@ public class Tools {
   static ArrayList<String> messages = new ArrayList<String> ();
   static boolean codeIsValid = true;
   static boolean oneActorDefined = false;
+  static boolean pass2Error = false;
   static public void printMessages(){
 		for(int i = 0 ; i < messages.size() ; i++){
 			System.out.println(messages.get(i));
@@ -62,4 +63,58 @@ public class Tools {
     }
     return error;
   }
+
+  // Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count)
+  static Type expr_mem_typeCheck(Type type , int count){
+    Type result = type;
+    while (count > 0 && result instanceof ArrayType){
+      ArrayType castedItem = (ArrayType) result;
+      result = castedItem.getType();
+      count --;
+    }
+    if (count > 0){
+      pass2Error = true;
+      System.out.println("calling dimensions than array's size");
+      return NoType.getInstance();
+    }
+    return result;
+  }
+  static Type expr_un_typeCheck(Type type){
+    if(type instanceof IntType){
+      return type;
+    }
+    else if (!(type instanceof NoType)){
+      pass2Error = true;
+      System.out.println("Error in unary operand use");
+      return NoType.getInstance();
+    }
+    else // type is NoType
+      return NoType.getInstance();
+  }
+  static Type expr_mult_tmp_typeCheck(Type type1 , Type type2){
+    if(type2 == null){
+      return type1;
+    }
+    else if(type1 instanceof IntType && type2 instanceof IntType){
+      return IntType.getInstance();
+    }
+    else if (type1 instanceof NoType){
+      return NoType.getInstance();
+    }
+   else {
+     pass2Error = true;
+     System.out.println("Error in expr_mult_tmp");
+     return NoType.getInstance();
+   } 
+  }
+  static Type expr_mult_typeCheck(Type type1, Type type2){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  }
+  static Type expr_add_tmp_typeCheck(Type type1, Type type2){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  }
+  static Type expr_add_typeCheck(Type type1, Type type2){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  }
+  
 }
