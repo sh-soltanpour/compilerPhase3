@@ -65,7 +65,7 @@ public class Tools {
   }
 
   // Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count)
-  static Type expr_mem_typeCheck(Type type , int count){
+  static Type expr_mem_typeCheck(Type type , int count){    
     Type result = type;
     while (count > 0 && result instanceof ArrayType){
       ArrayType castedItem = (ArrayType) result;
@@ -80,7 +80,10 @@ public class Tools {
     return result;
   }
   static Type expr_un_typeCheck(Type type){
-    if(type instanceof IntType){
+    if (type == null){
+      return null;
+    }
+    else if(type instanceof IntType){
       return type;
     }
     else if (!(type instanceof NoType)){
@@ -98,7 +101,7 @@ public class Tools {
     else if(type1 instanceof IntType && type2 instanceof IntType){
       return IntType.getInstance();
     }
-    else if (type1 instanceof NoType){
+    else if (type1 instanceof NoType || type2 instanceof NoType){
       return NoType.getInstance();
     }
    else {
