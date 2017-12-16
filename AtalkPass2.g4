@@ -22,10 +22,23 @@ actor:
 state: type ID (',' ID)* NL;
 
 receiver:
-	{beginScope();} 'receiver' ID '(' (type ID (',' type ID)*)? ')' NL statements 'end' NL {endScope();
+	{beginScope();} 'receiver' ID '(' (type ID{SymbolTable.define();} (',' type ID{SymbolTable.define();})*)? ')' NL statements 'end' NL {endScope();
 		};
 
-type: 'char' ('[' CONST_NUM ']')* | 'int' ('[' CONST_NUM ']')*;
+type
+	returns[Type return_type]:
+	'char' {$return_type = CharType.getInstance();} (
+		'[' size = CONST_NUM {
+			int size = Integer.parseInt($size.text);
+			
+			$return_type= new ArrayType($return_type,size);} ']'
+	)*
+	| 'int' {$return_type = IntType.getInstance();} (
+		'[' size = CONST_NUM {
+			int size = Integer.parseInt($size.text);
+			
+			$return_type= new ArrayType($return_type,size);} ']'
+	)*;
 
 block:
 	{beginScope();} 'begin' NL statements 'end' NL {endScope();};
@@ -44,8 +57,8 @@ statement:
 	| block;
 
 stm_vardef:
-	type ID { SymbolTable.define(); } ('=' expr)? (
-		',' ID { SymbolTable.define(); } ('=' expr)?
+	var1=type ID { SymbolTable.define(); } ('=' var2=expr {Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);})? (
+		',' ID { SymbolTable.define(); } ('=' var2=expr{Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);})?
 	)* NL;
 
 stm_tell:
@@ -68,51 +81,55 @@ stm_assignment: expr NL;
 
 expr
 	returns[Type return_type]:
-	expr_assign {$return_type = $expr_assign.return_type;};
+	expr_assign {$return_type = $expr_assign.return_type;
+	if ($return_type != null)
+		System.out.println("EXPR type: " + $return_type.toString());};
 
 expr_assign
 	returns[Type return_type]:
-	expr_or '=' expr_assign
+	var1=expr_or '=' var2=expr_assign {$return_type = Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);}
 	| expr_or {$return_type = $expr_or.return_type;};
 
 expr_or
-	returns[Type return_type]: expr_and expr_or_tmp;
+	returns[Type return_type]: var1=expr_and var2=expr_or_tmp{$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);};
 
 expr_or_tmp
 	returns[Type return_type]:
-	'or' expr_and expr_or_tmp
+	'or' var1=expr_and var2=expr_or_tmp{$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
 	| {$return_type = null;};
 
 expr_and
-	returns[Type return_type]: expr_eq expr_and_tmp;
+	returns[Type return_type]: var1=expr_eq var2=expr_and_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);};
 
 expr_and_tmp
 	returns[Type return_type]:
-	'and' expr_eq expr_and_tmp
+	'and' var1=expr_eq var2=expr_and_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
 	| {$return_type = null;};
 
 expr_eq
-	returns[Type return_type]: expr_cmp expr_eq_tmp;
+	returns[Type return_type]: var1=expr_cmp var2=expr_eq_tmp{$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);
+		
+	};
 
 expr_eq_tmp
-	returns[Type return_type]: ('==' | '<>') var1=expr_cmp var2=expr_eq_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
-		}
+	returns[Type return_type]: ('==' | '<>') var1=expr_cmp var2=expr_eq_tmp {$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);}
 	| {$return_type = null;};
 
 expr_cmp
 	returns[Type return_type]:
 	var1 = expr_add var2 = expr_cmp_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+	
 		};
 
 expr_cmp_tmp
-	returns[Type return_type]: ('<' | '>') var1 = expr_add var2 = expr_cmp_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
-		}
+	returns[Type return_type]: ('<' | '>') var1 = expr_add var2 = expr_cmp_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
 	| {$return_type = null;};
 
 expr_add
 	returns[Type return_type]:
 	var1 = expr_mult var2 = expr_add_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
-		};
+	
+	};
 
 expr_add_tmp
 	returns[Type return_type]: ('+' | '-') var1 = expr_mult var2 = expr_add_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
@@ -152,6 +169,8 @@ expr_other
 	| id = ID { 
             SymbolTableItem item = SymbolTable.top.get($id.text);
             if(item == null) {
+								Tools.putLocalVar($id.text, NoType.getInstance());
+								SymbolTable.define();
 								$return_type = NoType.getInstance();
                 print($id.line + ") Item " + $id.text + " doesn't exist.");
             }

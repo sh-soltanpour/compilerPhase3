@@ -98,9 +98,8 @@ public class SymbolTable {
 			// System.out.println(returnedValue);
 			return pre.get(key);
 		}
-
 		if(value != null && value.useMustBeComesAfterDef() &&
-				SymbolTable.definitionsCount < value.getDefinitionNumber()) {
+				SymbolTable.definitionsCount  < value.getDefinitionNumber()) {
 			// System.out.println("INja");
 			// System.out.println(SymbolTable.definitionsCount);
 			// System.out.println(value.getDefinitionNumber());

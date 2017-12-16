@@ -110,6 +110,22 @@ public class Tools {
      return NoType.getInstance();
    } 
   }
+  static Type expr_eq_tmp_typeCheck(Type type1, Type type2){
+    if (type2 == null){
+      return type1;
+    }
+    else if (type1 instanceof NoType || type2 instanceof NoType){
+      return NoType.getInstance();    
+    }
+    else if (type1.equals(type2)){
+      return IntType.getInstance();
+    }
+    else {
+      pass2Error = true;
+      System.out.println("Error in equality operator usage");
+      return NoType.getInstance();
+    }
+  }
   static Type expr_mult_typeCheck(Type type1, Type type2){
     return Tools.expr_mult_tmp_typeCheck(type1, type2);
   }
@@ -118,6 +134,21 @@ public class Tools {
   }
   static Type expr_add_typeCheck(Type type1, Type type2){
     return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  }
+  static Type expr_assign_typeCheck(Type type1, Type type2){
+    if (type2 == null){
+      return type1;
+    }
+    if (type1 instanceof NoType || type2 instanceof NoType){
+      return NoType.getInstance();
+    }
+    else if (!type1.equals(type2)){
+      pass2Error = true;
+      System.out.println("Error in assignment");
+      return NoType.getInstance();
+    }
+    else 
+      return type1;
   }
   
 }
