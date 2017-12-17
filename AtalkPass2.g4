@@ -62,12 +62,20 @@ stm_vardef:
 	)* NL;
 
 stm_tell:
-	(ID | 'sender' | 'self') '<<' ID '(' (expr (',' expr)*)? ')' NL;
+	(actorId = ID | 'sender' | 'self') '<<' ID '(' (expr (',' expr)*)? ')' NL
+	{
+			SymbolTableActorItem actorItem = SymbolTable.top.getActor($actorId.text);
+			if (actorItem == null){
+				Tools.pass2Error = true;
+				print("actor not found");
+			}
 
-stm_write: 'write' '(' expr ')' NL;
+	};
+
+stm_write: 'write' '(' var1=expr ')' NL{Tools.checkWriteArgument($var1.return_type);};
 
 stm_if_elseif_else:
-	'if' expr NL statements ('elseif' expr NL statements)* (
+	'if' var1=expr{Tools.checkConditionType($var1.return_type);} NL statements ('elseif' var2=expr {Tools.checkConditionType($var2.return_type);} NL statements)* (
 		'else' NL statements
 	)? 'end' NL;
 
@@ -167,23 +175,26 @@ expr_other
 	| CONST_CHAR {$return_type = CharType.getInstance();}
 	| str = CONST_STR {$return_type = new ArrayType(CharType.getInstance(),$str.text.length()-2 );}
 	| id = ID { 
+						
             SymbolTableItem item = SymbolTable.top.get($id.text);
-            if(item == null) {
+	          if(!(item instanceof SymbolTableVariableItemBase)) {
 								Tools.putLocalVar($id.text, NoType.getInstance());
 								SymbolTable.define();
 								$return_type = NoType.getInstance();
                 print($id.line + ") Item " + $id.text + " doesn't exist.");
             }
             else {
+							System.out.println("Now we are here");
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
                 print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
 								$return_type = var.getVariable().getType();
 						}
   }
-	| '{' expr (',' expr)* '}'
+	|{ArrayList <Type> types = new ArrayList<Type>();} '{' var1=expr{types.add($var1.return_type);}
+	 (',' var2=expr{types.add($var2.return_type);})* '}' {$return_type = Tools.arrayInitTypeCheck(types);}
 	| 'read' '(' num = CONST_NUM ')' {$return_type = new ArrayType(CharType.getInstance(),Integer.parseInt($num.text));
 		}
-	| '(' expr ')';
+	| '(' var1=expr ')' {$return_type = $var1.return_type;} ;
 
 CONST_NUM: [0-9]+;
 

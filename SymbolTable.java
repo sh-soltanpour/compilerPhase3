@@ -110,7 +110,16 @@ public class SymbolTable {
 		}
 		return value;
 	}
-
+	public SymbolTableActorItem getActor(String key){
+		SymbolTable current = this;
+		while (current.pre != null){
+			current = current.pre;
+		}
+		if (current.get(key) instanceof SymbolTableActorItem)
+			return (SymbolTableActorItem)current.get(key);
+		else 
+			return null;
+	}
 	public SymbolTable getPreSymbolTable() {
 		return pre;
 	}

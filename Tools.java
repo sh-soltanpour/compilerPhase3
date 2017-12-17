@@ -143,6 +143,8 @@ public class Tools {
       return NoType.getInstance();
     }
     else if (!type1.equals(type2)){
+      System.out.println("Type 1 = " + type1.toString());
+      System.out.println("Type 2 = " + type2.toString());
       pass2Error = true;
       System.out.println("Error in assignment");
       return NoType.getInstance();
@@ -150,5 +152,29 @@ public class Tools {
     else 
       return type1;
   }
-  
+  static void checkConditionType(Type type1){
+
+    if (!(type1 instanceof IntType || type1 instanceof NoType)){
+      pass2Error = true;
+      System.out.println("Error in if condition type");
+    }
+  }
+  static void checkWriteArgument(Type type1){
+    if (!(type1 instanceof IntType || type1 instanceof CharType)){
+      if( !(type1 instanceof ArrayType && ((ArrayType)type1).getType() instanceof CharType)) {
+        pass2Error = true;
+        System.out.println("Invalid write argument type");
+        }
+    }
+  }
+  static Type arrayInitTypeCheck(ArrayList<Type> types){
+      for (int i = 0; i < types.size(); i++){
+        if (!types.get(i).equals(types.get(0))){
+          pass2Error = true;
+          System.out.println("Error in array init");
+          return NoType.getInstance();
+        }
+      }
+      return new ArrayType(types.get(0),types.size());
+  }
 }

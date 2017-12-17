@@ -110,7 +110,7 @@ receiver:
 
 	;
 
-type returns [Type return_type]:
+type returns [Type return_type]:{ArrayList <Integer> sizes = new ArrayList<Integer>();}
 		'char' {$return_type = CharType.getInstance();} ('[' size=CONST_NUM{
 			int size = Integer.parseInt($size.text);
 			if(size <= 0){
@@ -118,16 +118,31 @@ type returns [Type return_type]:
 				print("line "+ String.valueOf($size.getLine())+":araye kochiktar az 0 eh:|");
 				size = 0;
 			}
-			$return_type= new ArrayType($return_type,size);} ']')* 
-	|	'int'  {$return_type = IntType.getInstance();}  ('[' size=CONST_NUM {
+			sizes.add(size);
+			} ']')* 
+			{
+			 for (int i = sizes.size()-1; i >= 0; i--){
+				 $return_type = new ArrayType($return_type,sizes.get(i));
+		 		}
+				 System.out.println("Now type is " + $return_type.toString());
+			 } 
+| {ArrayList <Integer> sizes = new ArrayList<Integer>();} 'int'  {$return_type = IntType.getInstance();}  ('[' size=CONST_NUM {
 			int size = Integer.parseInt($size.text);
 			if(size <= 0){
 				Tools.codeIsValid = false;
 				print("line "+ String.valueOf($size.getLine())+":araye kochiktar az 0 eh:|");
 				size = 0;
 			}
-			$return_type= new ArrayType($return_type,size);}
+			sizes.add(size);
+			}
 		 ']')* 	
+		 {
+				 System.out.println("b");
+			 for (int i = sizes.size()-1; i >= 0; i--){
+				 System.out.println("a");
+				 $return_type = new ArrayType($return_type,sizes.get(i));
+		 		}
+		 }
 	;
 
 block[boolean foreach]:
