@@ -143,8 +143,6 @@ public class Tools {
       return NoType.getInstance();
     }
     else if (!type1.equals(type2)){
-      System.out.println("Type 1 = " + type1.toString());
-      System.out.println("Type 2 = " + type2.toString());
       pass2Error = true;
       System.out.println("Error in assignment");
       return NoType.getInstance();

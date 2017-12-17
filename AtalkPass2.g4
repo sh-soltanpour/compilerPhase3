@@ -57,8 +57,24 @@ statement:
 	| block;
 
 stm_vardef:
-	var1=type ID { SymbolTable.define(); } ('=' var2=expr {Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);})? (
-		',' ID { SymbolTable.define(); } ('=' var2=expr{Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);})?
+	type id1=ID { SymbolTable.define(); } ('=' var2=expr 
+	{
+		SymbolTableItem item = SymbolTable.top.get($id1.text);
+		if(item instanceof SymbolTableVariableItemBase){
+				SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
+				Tools.expr_assign_typeCheck(var.getVariable().getType(), $var2.return_type);
+		}		
+	}
+	)? (
+	',' id2=ID { SymbolTable.define(); } ('=' var2=expr
+		{
+			SymbolTableItem item = SymbolTable.top.get($id2.text);
+			if(item instanceof SymbolTableVariableItemBase){
+				SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
+				Tools.expr_assign_typeCheck(var.getVariable().getType(), $var2.return_type);
+			}
+		}
+		)?
 	)* NL;
 
 stm_tell:
