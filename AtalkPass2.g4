@@ -22,8 +22,10 @@ actor:
 state: type ID (',' ID)* NL;
 
 receiver:
-	{beginScope();} 'receiver' ID '(' (type ID{SymbolTable.define();} (',' type ID{SymbolTable.define();})*)? ')' NL statements 'end' NL {endScope();
-		};
+	{beginScope();} 'receiver' recName=ID '(' (var1=type ID{SymbolTable.define();} (',' var2=type ID{SymbolTable.define();})*)? ')' NL statements 'end' NL 
+	{	
+		endScope();
+	};
 
 type
 	returns[Type return_type]:
@@ -77,15 +79,29 @@ stm_vardef:
 		)?
 	)* NL;
 
-stm_tell:
-	(actorId = ID | 'sender' | 'self') '<<' ID '(' (expr (',' expr)*)? ')' NL
-	{
-			SymbolTableActorItem actorItem = SymbolTable.top.getActor($actorId.text);
-			if (actorItem == null){
-				Tools.pass2Error = true;
-				print("actor not found");
+stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
+	(actorId = ID | 'sender' | actorId='self') '<<' recName=ID '(' (var1=expr{types.add($var1.return_type);} (',' var2=expr{types.add($var2.return_type);})*)? ')' NL
+	{		
+			if ($actorId.text.equals("self")){
+				if(SymbolTable.top.hasReceiver($recName.text, types))
+					print("rec found");
+				else
+					print("rec not found");
 			}
-
+			else{
+				SymbolTableActorItem actorItem = SymbolTable.top.getActor($actorId.text);
+				
+				if (actorItem == null){
+					Tools.pass2Error = true;
+					print("actor not found");
+				}
+				else{
+					if(actorItem.getSymbolTable().hasReceiver($recName.text, types))
+						print("rec found");
+					else
+						print("rec not found");
+				}
+			}
 	};
 
 stm_write: 'write' '(' var1=expr ')' NL{Tools.checkWriteArgument($var1.return_type);};

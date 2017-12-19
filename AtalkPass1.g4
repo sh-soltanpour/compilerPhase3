@@ -58,7 +58,14 @@ actor:
 		}
 			(state | receiver | NL)*
 		'end' (NL | EOF)
-		{Tools.oneActorDefined = true;endScope();}
+		{Tools.oneActorDefined = true;
+			SymbolTableActorItem item = SymbolTable.top.getActor($name.text);
+			if (item != null){
+				System.out.println("actor found");
+				item.setSymbolTable(SymbolTable.top);
+			}
+			endScope();
+		}
 	;
 state:
 		{ArrayList<String> names = new ArrayList<String>();} 

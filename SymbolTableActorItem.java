@@ -12,7 +12,13 @@ public class SymbolTableActorItem extends SymbolTableItem {
   public int getOffset() {
     return offset;
   }
-
+  public void setSymbolTable(SymbolTable symbolTable){
+    this.symbolTable = symbolTable;
+  }
+  public SymbolTable getSymbolTable(){
+    return symbolTable;
+  }
   Actor actor;
   int offset;
+  SymbolTable symbolTable;
 }

@@ -99,7 +99,7 @@ public class SymbolTable {
 			return pre.get(key);
 		}
 		if(value != null && value.useMustBeComesAfterDef() &&
-				SymbolTable.definitionsCount  < value.getDefinitionNumber()) {
+				SymbolTable.definitionsCount  <= value.getDefinitionNumber()) {
 			// System.out.println("INja");
 			// System.out.println(SymbolTable.definitionsCount);
 			// System.out.println(value.getDefinitionNumber());
@@ -123,7 +123,19 @@ public class SymbolTable {
 	public SymbolTable getPreSymbolTable() {
 		return pre;
 	}
-
+	public boolean hasReceiver(String recName , ArrayList<Type> types){
+		String key = recName + "#";
+    for(int i = 0 ; i < types.size(); i++){
+      key += types.get(i).toString(); 
+    }
+    SymbolTableItem item = this.get(key);
+    if (item != null){
+			System.out.println("not null");
+			return true;
+    }
+    else 
+    	return false;
+	}
 	SymbolTable pre;
 	HashMap<String, SymbolTableItem> items;
 	HashMap<Register, Integer> offsets;
