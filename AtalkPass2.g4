@@ -83,10 +83,9 @@ stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
 	(actorId = ID | 'sender' | actorId='self') '<<' recName=ID '(' (var1=expr{types.add($var1.return_type);} (',' var2=expr{types.add($var2.return_type);})*)? ')' NL
 	{		
 			if ($actorId.text.equals("self")){
-				if(SymbolTable.top.hasReceiver($recName.text, types))
-					print("rec found");
-				else
-					print("rec not found");
+				if(!SymbolTable.top.hasReceiver($recName.text, types))
+					print("line"+ $actorId.getLine()  +": receiver not found");
+				
 			}
 			else{
 				SymbolTableActorItem actorItem = SymbolTable.top.getActor($actorId.text);
@@ -96,10 +95,8 @@ stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
 					print("actor not found");
 				}
 				else{
-					if(actorItem.getSymbolTable().hasReceiver($recName.text, types))
-						print("rec found");
-					else
-						print("rec not found");
+					if(!actorItem.getSymbolTable().hasReceiver($recName.text, types))
+						print("line"+ $actorId.getLine()  +": receiver not found");
 				}
 			}
 	};
@@ -120,81 +117,111 @@ stm_break: 'break' NL;
 stm_assignment: expr NL;
 
 expr
-	returns[Type return_type]:
-	expr_assign {$return_type = $expr_assign.return_type;
+	returns[Type return_type, boolean isLvalue]:
+	expr_assign {$isLvalue = $expr_assign.isLvalue;$return_type = $expr_assign.return_type;
 	if ($return_type != null)
 		System.out.println("EXPR type: " + $return_type.toString());};
 
 expr_assign
-	returns[Type return_type]:
-	var1=expr_or '=' var2=expr_assign {$return_type = Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);}
-	| expr_or {$return_type = $expr_or.return_type;};
+	returns[Type return_type, boolean isLvalue]:
+	var1=expr_or '=' var2=expr_assign {Tools.checkLvalue($var1.isLvalue);$return_type = Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type);}
+	| var3=expr_or {$isLvalue = $var3.isLvalue;$return_type = $expr_or.return_type;};
 
 expr_or
-	returns[Type return_type]: var1=expr_and var2=expr_or_tmp{$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);};
+	returns[Type return_type, boolean isLvalue]: var1=expr_and var2=expr_or_tmp
+	{$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+		$isLvalue = $var1.isLvalue && $var2.isLvalue;
+	}
+	;
 
 expr_or_tmp
-	returns[Type return_type]:
-	'or' var1=expr_and var2=expr_or_tmp{$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
-	| {$return_type = null;};
+	returns[Type return_type, boolean isLvalue]:
+	'or' var1=expr_and var2=expr_or_tmp
+	{$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
+	 $isLvalue = false;
+	}
+	| {$isLvalue = true;$return_type = null;};
 
 expr_and
-	returns[Type return_type]: var1=expr_eq var2=expr_and_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);};
+	returns[Type return_type, boolean isLvalue]: 
+	var1=expr_eq var2=expr_and_tmp 
+		{
+		$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+		$isLvalue = $var1.isLvalue && $var2.isLvalue;
+		};
 
 expr_and_tmp
-	returns[Type return_type]:
-	'and' var1=expr_eq var2=expr_and_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
-	| {$return_type = null;};
+	returns[Type return_type, boolean isLvalue]:
+	'and' var1=expr_eq var2=expr_and_tmp 
+		{
+		$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
+		$isLvalue = false;
+		}
+	| {$isLvalue = true;$return_type = null;};
 
 expr_eq
-	returns[Type return_type]: var1=expr_cmp var2=expr_eq_tmp{$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);
-		
+	returns[Type return_type, boolean isLvalue]: 
+	var1=expr_cmp var2=expr_eq_tmp{
+		$isLvalue = $var1.isLvalue && $var2.isLvalue;
+		$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);
 	};
 
 expr_eq_tmp
-	returns[Type return_type]: ('==' | '<>') var1=expr_cmp var2=expr_eq_tmp {$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);}
-	| {$return_type = null;};
+	returns[Type return_type, boolean isLvalue]: 
+	('==' | '<>') var1=expr_cmp var2=expr_eq_tmp {$isLvalue = false;$return_type = Tools.expr_eq_tmp_typeCheck($var1.return_type, $var2.return_type);}
+	| {$isLvalue = true;$return_type = null;};
 
 expr_cmp
-	returns[Type return_type]:
-	var1 = expr_add var2 = expr_cmp_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
-	
-		};
+	returns[Type return_type, boolean isLvalue]:
+	var1 = expr_add var2 = expr_cmp_tmp 
+	{
+		$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+		$isLvalue = $var1.isLvalue && $var2.isLvalue;
+	};
 
 expr_cmp_tmp
-	returns[Type return_type]: ('<' | '>') var1 = expr_add var2 = expr_cmp_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
-	| {$return_type = null;};
+	returns[Type return_type, boolean isLvalue]: 
+	('<' | '>') var1 = expr_add var2 = expr_cmp_tmp {$isLvalue = false;$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);}
+	| {$isLvalue = true;$return_type = null;};
 
 expr_add
-	returns[Type return_type]:
-	var1 = expr_mult var2 = expr_add_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+	returns[Type return_type, boolean isLvalue]:
+	var1 = expr_mult var2 = expr_add_tmp {
+		$isLvalue = $var1.isLvalue && $var2.isLvalue;
+		$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
 	
 	};
 
 expr_add_tmp
-	returns[Type return_type]: ('+' | '-') var1 = expr_mult var2 = expr_add_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
+	returns[Type return_type, boolean isLvalue]: 
+	('+' | '-') var1 = expr_mult var2 = expr_add_tmp {$isLvalue = false;$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
 		}
-	| {$return_type = null;};
+	| {$isLvalue = true;$return_type = null;};
 
 expr_mult
-	returns[Type return_type]:
-	var1 = expr_un var2 = expr_mult_tmp {$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
+	returns[Type return_type, boolean isLvalue]:
+	var1 = expr_un var2 = expr_mult_tmp {$isLvalue=$var1.isLvalue && $var2.isLvalue;$return_type = Tools.expr_mult_typeCheck($var1.return_type, $var2.return_type);
 		};
 
 expr_mult_tmp
-	returns[Type return_type]: ('*' | '/') var1 = expr_un var2 = expr_mult_tmp {$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
+	returns[Type return_type, boolean isLvalue]: 
+	('*' | '/') var1 = expr_un var2 = expr_mult_tmp {$isLvalue =false;$return_type = Tools.expr_mult_tmp_typeCheck($var1.return_type, $var2.return_type);
 		}
-	| {$return_type = null;};
+	| {$isLvalue = true;$return_type = null;};
 
 expr_un
-	returns[Type return_type]: ('not' | '-') expr_un_var = expr_un {$return_type = Tools.expr_un_typeCheck($expr_un_var.return_type);
+	returns[Type return_type, boolean isLvalue]: 
+	('not' | '-') expr_un_var = expr_un {$isLvalue = false;$return_type = Tools.expr_un_typeCheck($expr_un_var.return_type);
 		}
-	| expr_mem {$return_type = $expr_mem.return_type;};
+	| var1=expr_mem {$isLvalue = $var1.isLvalue;$return_type = $expr_mem.return_type;};
 
 expr_mem
-	returns[Type return_type]:
-	expr_other expr_mem_tmp {$return_type = Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count);
-		};
+	returns[Type return_type, boolean isLvalue]:
+	var1=expr_other expr_mem_tmp 
+	{
+		$return_type = Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count);
+		$isLvalue = $var1.isLvalue;
+	};
 
 expr_mem_tmp
 	returns[int count]:
@@ -202,12 +229,12 @@ expr_mem_tmp
 	| {$count = 0;};
 
 expr_other
-	returns[Type return_type]:
-	CONST_NUM {$return_type = IntType.getInstance();}
-	| CONST_CHAR {$return_type = CharType.getInstance();}
-	| str = CONST_STR {$return_type = new ArrayType(CharType.getInstance(),$str.text.length()-2 );}
+	returns[Type return_type, boolean isLvalue]:
+	CONST_NUM {$return_type = IntType.getInstance();$isLvalue = false;}
+	| CONST_CHAR {$return_type = CharType.getInstance();$isLvalue = false;}
+	| str = CONST_STR {$return_type = new ArrayType(CharType.getInstance(),$str.text.length()-2 );$isLvalue = false;}
 	| id = ID { 
-						
+						$isLvalue = true;
             SymbolTableItem item = SymbolTable.top.get($id.text);
 	          if(!(item instanceof SymbolTableVariableItemBase)) {
 								Tools.putLocalVar($id.text, NoType.getInstance());
@@ -222,11 +249,12 @@ expr_other
 								$return_type = var.getVariable().getType();
 						}
   }
-	|{ArrayList <Type> types = new ArrayList<Type>();} '{' var1=expr{types.add($var1.return_type);}
+	|{$isLvalue = false;ArrayList <Type> types = new ArrayList<Type>();} '{' var1=expr{types.add($var1.return_type);}
 	 (',' var2=expr{types.add($var2.return_type);})* '}' {$return_type = Tools.arrayInitTypeCheck(types);}
-	| 'read' '(' num = CONST_NUM ')' {$return_type = new ArrayType(CharType.getInstance(),Integer.parseInt($num.text));
+	
+	| 'read' '(' num = CONST_NUM ')' {$isLvalue = false;$return_type = new ArrayType(CharType.getInstance(),Integer.parseInt($num.text));
 		}
-	| '(' var1=expr ')' {$return_type = $var1.return_type;} ;
+	| '(' var1=expr ')' {$isLvalue = $var1.isLvalue;$return_type = $var1.return_type;$isLvalue = true;} ;
 
 CONST_NUM: [0-9]+;
 

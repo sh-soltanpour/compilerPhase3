@@ -15,10 +15,12 @@ public class Atalk {
     // System.out.println(pass1Tree.toStringTree());
 
     // Pass #2
-    reader.reset();
-    AtalkPass2Lexer pass2Lexer = new AtalkPass2Lexer(reader);
-    CommonTokenStream pass2Tokens = new CommonTokenStream(pass2Lexer);
-    AtalkPass2Parser pass2Parser = new AtalkPass2Parser(pass2Tokens);
-    ParseTree pass2Tree = pass2Parser.program();
+    if (Tools.codeIsValid){
+      reader.reset();
+      AtalkPass2Lexer pass2Lexer = new AtalkPass2Lexer(reader);
+      CommonTokenStream pass2Tokens = new CommonTokenStream(pass2Lexer);
+      AtalkPass2Parser pass2Parser = new AtalkPass2Parser(pass2Tokens);
+      ParseTree pass2Tree = pass2Parser.program();
+    }
   }
 }

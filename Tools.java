@@ -175,4 +175,10 @@ public class Tools {
       }
       return new ArrayType(types.get(0),types.size());
   }
+  static void checkLvalue(boolean isLvalue){
+    if (!isLvalue){
+      pass2Error = true;
+      System.out.println("Left side of assignment is not lvalue");
+    }
+  }
 }
