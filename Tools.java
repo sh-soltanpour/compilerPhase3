@@ -74,7 +74,7 @@ public class Tools {
     }
     if (count > 0){
       pass2Error = true;
-      System.out.println("calling dimensions than array's size");
+      System.out.println("calling dimensions more than array's size");
       return NoType.getInstance();
     }
     return result;

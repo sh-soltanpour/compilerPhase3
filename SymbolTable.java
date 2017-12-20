@@ -99,9 +99,14 @@ public class SymbolTable {
 			// System.out.println(returnedValue);
 			return pre.get(key);
 		}
+		// if (value != null){
+		// 	System.out.println("Key = " + key);
+		// 	System.out.println("def count " + SymbolTable.definitionsCount );
+		// 	System.out.println("var count " + value.getDefinitionNumber() );
+		// }
 		if(value != null && value.useMustBeComesAfterDef() &&
 				SymbolTable.definitionsCount  <= value.getDefinitionNumber()) {
-			// System.out.println("INja");
+			System.out.println("INja");
 			// System.out.println(SymbolTable.definitionsCount);
 			// System.out.println(value.getDefinitionNumber());
 			if(pre != null) 

@@ -133,9 +133,7 @@ stm_assignment: expr NL;
 
 expr
 	returns[Type return_type, boolean isLvalue]:
-	expr_assign {$isLvalue = $expr_assign.isLvalue;$return_type = $expr_assign.return_type;
-	if ($return_type != null)
-		System.out.println("EXPR type: " + $return_type.toString());};
+	expr_assign {$isLvalue = $expr_assign.isLvalue;$return_type = $expr_assign.return_type;};
 
 expr_assign
 	returns[Type return_type, boolean isLvalue]:
@@ -258,7 +256,6 @@ expr_other
                 print($id.line + ") Item " + $id.text + " doesn't exist.");
             }
             else {
-							System.out.println("Now we are here");
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
                 print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
 								$return_type = var.getVariable().getType();
