@@ -150,14 +150,14 @@ public class Tools {
     else 
       return type1;
   }
-  static void checkConditionType(Type type1){
+  static void checkConditionType(Type type1, int line){
 
     if (!(type1 instanceof IntType || type1 instanceof NoType)){
       pass2Error = true;
       System.out.println("line"+line+": Error in if condition type");
     }
   }
-  static void checkWriteArgument(Type type1){
+  static void checkWriteArgument(Type type1, int line){
     if (!(type1 instanceof IntType || type1 instanceof CharType)){
       if( !(type1 instanceof ArrayType && ((ArrayType)type1).getType() instanceof CharType)) {
         pass2Error = true;
@@ -165,7 +165,7 @@ public class Tools {
         }
     }
   }
-  static Type arrayInitTypeCheck(ArrayList<Type> types){
+  static Type arrayInitTypeCheck(ArrayList<Type> types, int line){
       for (int i = 0; i < types.size(); i++){
         if (!types.get(i).equals(types.get(0))){
           pass2Error = true;
@@ -175,7 +175,7 @@ public class Tools {
       }
       return new ArrayType(types.get(0),types.size());
   }
-  static void checkLvalue(boolean isLvalue){
+  static void checkLvalue(boolean isLvalue, int line){
     if (!isLvalue){
       pass2Error = true;
       System.out.println("line"+line+": Left side of assignment is not lvalue");

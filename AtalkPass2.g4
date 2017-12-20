@@ -116,10 +116,10 @@ stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
 			}
 	};
 
-stm_write: 'write' '(' var1=expr ')' NL{Tools.checkWriteArgument($var1.return_type);};
+stm_write: writeToken='write' '(' var1=expr ')' NL{Tools.checkWriteArgument($var1.return_type,$writeToken.getLine());};
 
 stm_if_elseif_else:
-	'if' var1=expr{Tools.checkConditionType($var1.return_type);} NL statements ('elseif' var2=expr {Tools.checkConditionType($var2.return_type);} NL statements)* (
+	ifToken='if' var1=expr{Tools.checkConditionType($var1.return_type,$ifToken.getLine());} NL statements (elseifToken='elseif' var2=expr {Tools.checkConditionType($var2.return_type,$elseifToken.getLine());} NL statements)* (
 		'else' NL statements
 	)? 'end' NL;
 
@@ -137,7 +137,7 @@ expr
 
 expr_assign
 	returns[Type return_type, boolean isLvalue, int line]:
-	var1=expr_or op='=' var2=expr_assign {Tools.checkLvalue($var1.isLvalue);$return_type = Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type,$op.getLine());}
+	var1=expr_or op='=' var2=expr_assign {Tools.checkLvalue($var1.isLvalue,$op.getLine());$return_type = Tools.expr_assign_typeCheck($var1.return_type, $var2.return_type,$op.getLine());}
 	| var3=expr_or 
 	{
 		$isLvalue = $var3.isLvalue;$return_type = $expr_or.return_type;
@@ -282,7 +282,7 @@ expr_other
 						}
   }
 	|{$isLvalue = false;ArrayList <Type> types = new ArrayList<Type>();} openBr='{' var1=expr{types.add($var1.return_type);}
-	 (',' var2=expr{types.add($var2.return_type);})* '}' {$return_type = Tools.arrayInitTypeCheck(types);$line = $openBr.getLine();}
+	 (',' var2=expr{types.add($var2.return_type);})* '}' {$return_type = Tools.arrayInitTypeCheck(types,$openBr.getLine());$line = $openBr.getLine();}
 	
 	| 'read' openPr='(' num = CONST_NUM ')' {$isLvalue = false;$return_type = new ArrayType(CharType.getInstance(),Integer.parseInt($num.text));$line=$openPr.getLine();}
 	| openPr='(' var1=expr ')' {$isLvalue = $var1.isLvalue;$return_type = $var1.return_type;$isLvalue = true;$line=$openPr.getLine();} ;
