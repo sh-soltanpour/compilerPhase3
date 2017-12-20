@@ -22,7 +22,14 @@ actor:
 state: type ID (',' ID)* NL;
 
 receiver:
-	{beginScope();} 'receiver' recName=ID '(' (var1=type ID{SymbolTable.define();} (',' var2=type ID{SymbolTable.define();})*)? ')' NL statements 'end' NL 
+	{beginScope();} 'receiver' recName=ID '(' (var1=type ID{SymbolTable.define();} (',' var2=type ID{SymbolTable.define();})*)? ')' NL 
+	{
+		
+		if($recName.text.equals("init") && $var1.text == null){
+			SymbolTable.top.isInitEnable();
+		}
+	
+	}statements 'end' NL 
 	{	
 		endScope();
 	};
@@ -80,12 +87,20 @@ stm_vardef:
 	)* NL;
 
 stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
-	(actorId = ID | 'sender' | actorId='self') '<<' recName=ID '(' (var1=expr{types.add($var1.return_type);} (',' var2=expr{types.add($var2.return_type);})*)? ')' NL
+	(actorId = ID | actorId='sender' | actorId='self') '<<' recName=ID '(' (var1=expr{types.add($var1.return_type);} (',' var2=expr{types.add($var2.return_type);})*)? ')' NL
 	{		
 			if ($actorId.text.equals("self")){
-				if(!SymbolTable.top.hasReceiver($recName.text, types))
+				if(!SymbolTable.top.hasReceiver($recName.text, types)){
+					Tools.pass2Error = true;
 					print("line"+ $actorId.getLine()  +": receiver not found");
+				}
 				
+			}
+			else if ($actorId.text.equals("sender")){
+				if(SymbolTable.top.getIsInit()){
+					Tools.pass2Error = true;
+					print("line" + $actorId.getLine() + ": Sender in init() is not allowed");
+				}
 			}
 			else{
 				SymbolTableActorItem actorItem = SymbolTable.top.getActor($actorId.text);

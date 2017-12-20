@@ -45,6 +45,7 @@ public class SymbolTable {
 		this.pre = pre;
 		this.items = new HashMap<String, SymbolTableItem>();
 		this.offsets = new HashMap<Register, Integer>();
+		this.isInit = false;
 	}
 
 	public void put(SymbolTableItem item) throws ItemAlreadyExistsException {
@@ -136,7 +137,14 @@ public class SymbolTable {
     else 
     	return false;
 	}
+	public void isInitEnable(){
+		this.isInit = true;
+	}
+	public boolean getIsInit(){
+		return isInit;
+	}
 	SymbolTable pre;
 	HashMap<String, SymbolTableItem> items;
 	HashMap<Register, Integer> offsets;
+	boolean isInit;
 }
