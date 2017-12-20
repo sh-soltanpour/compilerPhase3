@@ -74,7 +74,7 @@ public class Tools {
     }
     if (count > 0){
       pass2Error = true;
-      System.out.println("calling dimensions more than array's size");
+      System.out.println("line"+line+": calling dimensions more than array's size");
       return NoType.getInstance();
     }
     return result;
@@ -88,7 +88,7 @@ public class Tools {
     }
     else if (!(type instanceof NoType)){
       pass2Error = true;
-      System.out.println("Error in unary operand use");
+      System.out.println("Line"+line+": Error in unary operand use");
       return NoType.getInstance();
     }
     else // type is NoType
@@ -122,7 +122,7 @@ public class Tools {
     }
     else {
       pass2Error = true;
-      System.out.println("Error in equality operator usage");
+      System.out.println("line"+line+": Error in equality operator usage");
       return NoType.getInstance();
     }
   }
@@ -144,7 +144,7 @@ public class Tools {
     }
     else if (!type1.equals(type2)){
       pass2Error = true;
-      System.out.println("Error in assignment");
+      System.out.println("line"+line+": Error in assignment");
       return NoType.getInstance();
     }
     else 
@@ -154,14 +154,14 @@ public class Tools {
 
     if (!(type1 instanceof IntType || type1 instanceof NoType)){
       pass2Error = true;
-      System.out.println("Error in if condition type");
+      System.out.println("line"+line+": Error in if condition type");
     }
   }
   static void checkWriteArgument(Type type1){
     if (!(type1 instanceof IntType || type1 instanceof CharType)){
       if( !(type1 instanceof ArrayType && ((ArrayType)type1).getType() instanceof CharType)) {
         pass2Error = true;
-        System.out.println("Invalid write argument type");
+        System.out.println("line"+line+": Invalid write argument type");
         }
     }
   }
@@ -169,7 +169,7 @@ public class Tools {
       for (int i = 0; i < types.size(); i++){
         if (!types.get(i).equals(types.get(0))){
           pass2Error = true;
-          System.out.println("Error in array init");
+          System.out.println("line"+line+": Error in array init");
           return NoType.getInstance();
         }
       }
@@ -178,7 +178,7 @@ public class Tools {
   static void checkLvalue(boolean isLvalue){
     if (!isLvalue){
       pass2Error = true;
-      System.out.println("Left side of assignment is not lvalue");
+      System.out.println("line"+line+": Left side of assignment is not lvalue");
     }
   }
 }

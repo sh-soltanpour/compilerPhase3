@@ -1,0 +1,21 @@
+actor add<3>
+    reciever m(int a , int b)
+        x = 0
+        int z = 9
+        char s = 's'
+        g = 5
+        if(x == g)
+            int c = a+b
+        end
+        if (s != g)
+            x = x+1
+        end
+        if (s == g)
+            g = g - z
+        end 
+    end
+ actor add2< 4>
+    reciever n(int h , int l , char c)
+        h = ((l and h)+ (c - l)) or ((not l) and c) or (h <> l * l) and (c and l)
+    end
+end
