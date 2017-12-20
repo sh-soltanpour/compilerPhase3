@@ -65,7 +65,7 @@ public class Tools {
   }
 
   // Tools.expr_mem_typeCheck($expr_other.return_type,$expr_mem_tmp.count)
-  static Type expr_mem_typeCheck(Type type , int count){    
+  static Type expr_mem_typeCheck(Type type , int count, int line){    
     Type result = type;
     while (count > 0 && result instanceof ArrayType){
       ArrayType castedItem = (ArrayType) result;
@@ -79,7 +79,7 @@ public class Tools {
     }
     return result;
   }
-  static Type expr_un_typeCheck(Type type){
+  static Type expr_un_typeCheck(Type type, int line){
     if (type == null){
       return null;
     }
@@ -94,7 +94,7 @@ public class Tools {
     else // type is NoType
       return NoType.getInstance();
   }
-  static Type expr_mult_tmp_typeCheck(Type type1 , Type type2){
+  static Type expr_mult_tmp_typeCheck(Type type1 , Type type2, int line){
     if(type2 == null){
       return type1;
     }
@@ -106,11 +106,11 @@ public class Tools {
     }
    else {
      pass2Error = true;
-     System.out.println("Error in expr_mult_tmp");
+     System.out.println("line"+line+": Error in expr_mult_tmp");
      return NoType.getInstance();
    } 
   }
-  static Type expr_eq_tmp_typeCheck(Type type1, Type type2){
+  static Type expr_eq_tmp_typeCheck(Type type1, Type type2, int line){
     if (type2 == null){
       return type1;
     }
@@ -126,16 +126,16 @@ public class Tools {
       return NoType.getInstance();
     }
   }
-  static Type expr_mult_typeCheck(Type type1, Type type2){
-    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  static Type expr_mult_typeCheck(Type type1, Type type2, int line){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2, line);
   }
-  static Type expr_add_tmp_typeCheck(Type type1, Type type2){
-    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  static Type expr_add_tmp_typeCheck(Type type1, Type type2, int line){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2,line);
   }
-  static Type expr_add_typeCheck(Type type1, Type type2){
-    return Tools.expr_mult_tmp_typeCheck(type1, type2);
+  static Type expr_add_typeCheck(Type type1, Type type2, int line){
+    return Tools.expr_mult_tmp_typeCheck(type1, type2, line);
   }
-  static Type expr_assign_typeCheck(Type type1, Type type2){
+  static Type expr_assign_typeCheck(Type type1, Type type2, int line){
     if (type2 == null){
       return type1;
     }
