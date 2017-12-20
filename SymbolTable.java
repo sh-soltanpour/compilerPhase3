@@ -106,7 +106,7 @@ public class SymbolTable {
 		// }
 		if(value != null && value.useMustBeComesAfterDef() &&
 				SymbolTable.definitionsCount  <= value.getDefinitionNumber()) {
-			System.out.println("INja");
+			// System.out.println("INja");
 			// System.out.println(SymbolTable.definitionsCount);
 			// System.out.println(value.getDefinitionNumber());
 			if(pre != null) 
