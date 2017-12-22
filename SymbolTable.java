@@ -53,7 +53,7 @@ public class SymbolTable {
 			throw new ItemAlreadyExistsException();
 		items.put(item.getKey(), item);
 		SymbolTableItem myItem = items.get(item.getKey());
-		// System.out.println(myItem);
+
 		if(item instanceof SymbolTableVariableItemBase) {
 			SymbolTableVariableItemBase castedItem = (SymbolTableVariableItemBase) item;
 			int oldOffset = getOffset(castedItem.getBaseRegister());
@@ -93,28 +93,12 @@ public class SymbolTable {
 		// }
 		// System.out.println("Finished");
 		SymbolTableItem value = items.get(key);
-		// if (value != null){
-		// 	System.out.println("Null nist : " + key);
-		// }
-		// else {
-		// 	System.out.println("Null hast : " + key);
-		// }
 		if(value == null && pre != null){
 			SymbolTableItem returnedValue = pre.get(key);
-			// System.out.println("REturnedValue");
-			// System.out.println(returnedValue);
 			return pre.get(key);
 		}
-		// if (value != null){
-		// 	System.out.println("Key = " + key);
-		// 	System.out.println("def count " + SymbolTable.definitionsCount );
-		// 	System.out.println("var count " + value.getDefinitionNumber() );
-		// }
 		if(value != null && value.useMustBeComesAfterDef() &&
 				SymbolTable.definitionsCount  <= value.getDefinitionNumber()) {
-			// System.out.println("INja");
-			// System.out.println(SymbolTable.definitionsCount);
-			// System.out.println(value.getDefinitionNumber());
 			if(pre != null) 
 				return pre.get(key);
 			else 

@@ -274,7 +274,7 @@ expr_other
 								Tools.putLocalVar($id.text, NoType.getInstance());
 								SymbolTable.define();
 								$return_type = NoType.getInstance();
-                print($id.line + ") Item " + $id.text + " doesn't exist.");
+                print("line" + $id.line + ": Item " + $id.text + " doesn't exist.");
             }
             else {
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
