@@ -278,7 +278,6 @@ expr_other
             }
             else {
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
-                print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
 								$return_type = var.getVariable().getType();
 								$isLvalue = var.isLvalue();
 						}
