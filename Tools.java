@@ -121,7 +121,7 @@ public class Tools {
     }
    else {
      pass2Error = true;
-     System.out.println("line"+line+": Error in expr_mult_tmp");
+     System.out.println("line"+line+": invalid operand types in expression");
      return NoType.getInstance();
    } 
   }
