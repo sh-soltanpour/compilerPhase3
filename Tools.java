@@ -47,6 +47,21 @@ public class Tools {
     }
     return error;
   }
+  static public void putLocalVarForeach(String name, Type type){
+    try{
+      SymbolTable.top.put(
+              new SymbolTableLocalVariableItem(
+                  new Variable(name, type),
+                  SymbolTable.top.getOffset(Register.SP),
+                  false
+              )
+          );
+    }
+    catch (ItemAlreadyExistsException e) {
+      System.out.println("injaiim");
+      Tools.putLocalVar(name+"_temp_", type);
+    }
+  }
   static public boolean putGlobalVar(String name, Type type){
     boolean error = false;
     try{

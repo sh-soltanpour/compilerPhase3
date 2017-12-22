@@ -119,11 +119,12 @@ stm_tell:{ArrayList<Type> types = new ArrayList<Type>();}
 stm_write: writeToken='write' '(' var1=expr ')' NL{Tools.checkWriteArgument($var1.return_type,$writeToken.getLine());};
 
 stm_if_elseif_else:
-	ifToken='if' var1=expr{Tools.checkConditionType($var1.return_type,$ifToken.getLine());} NL statements (elseifToken='elseif' var2=expr {Tools.checkConditionType($var2.return_type,$elseifToken.getLine());} NL statements)* (
-		'else' NL statements
+	ifToken='if' var1=expr{Tools.checkConditionType($var1.return_type,$ifToken.getLine());} NL{beginScope();} statements{endScope();}
+	 (elseifToken='elseif' var2=expr {Tools.checkConditionType($var2.return_type,$elseifToken.getLine());} NL {beginScope();}statements{endScope();})* (
+		'else' NL {beginScope();}statements{endScope();}
 	)? 'end' NL;
 
-stm_foreach: 'foreach' ID {SymbolTable.define();} 'in' expr NL statements 'end' NL;
+stm_foreach: {beginScope();}'foreach' ID {SymbolTable.define();} 'in' expr NL statements 'end' NL{endScope();};
 
 stm_quit: 'quit' NL;
 
@@ -279,6 +280,11 @@ expr_other
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
                 print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
 								$return_type = var.getVariable().getType();
+								if (var.isLvalue())
+								print("L e");
+								else
+									print("nist");
+								$isLvalue = var.isLvalue();
 						}
   }
 	|{$isLvalue = false;ArrayList <Type> types = new ArrayList<Type>();} openBr='{' var1=expr{types.add($var1.return_type);}

@@ -51,7 +51,6 @@ public class SymbolTable {
 	public void put(SymbolTableItem item) throws ItemAlreadyExistsException {
 		if(items.containsKey(item.getKey()))
 			throw new ItemAlreadyExistsException();
-		// System.out.println("itesm put");
 		items.put(item.getKey(), item);
 		SymbolTableItem myItem = items.get(item.getKey());
 		// System.out.println(myItem);
@@ -70,6 +69,7 @@ public class SymbolTable {
 			Tools.messages.add(localOrGlobal + " variable name: "+name +" with type: " + type +" offset: " + String.valueOf(oldOffset)
 			+ ", size: " + String.valueOf(variable.getType().size()));
 		}
+
 	}
 
 	public int getOffset(Register baseRegister) {
@@ -93,6 +93,12 @@ public class SymbolTable {
 		// }
 		// System.out.println("Finished");
 		SymbolTableItem value = items.get(key);
+		// if (value != null){
+		// 	System.out.println("Null nist : " + key);
+		// }
+		// else {
+		// 	System.out.println("Null hast : " + key);
+		// }
 		if(value == null && pre != null){
 			SymbolTableItem returnedValue = pre.get(key);
 			// System.out.println("REturnedValue");
@@ -136,7 +142,6 @@ public class SymbolTable {
     }
     SymbolTableItem item = this.get(key);
     if (item != null){
-			System.out.println("not null");
 			return true;
     }
     else 
