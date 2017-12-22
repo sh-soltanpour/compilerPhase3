@@ -124,7 +124,7 @@ stm_if_elseif_else:
 		'else' NL {beginScope();}statements{endScope();}
 	)? 'end' NL;
 
-stm_foreach: {beginScope();}'foreach' ID {SymbolTable.define();} 'in' expr NL statements 'end' NL{endScope();};
+stm_foreach: {beginScope();} foreachToken='foreach' ID {SymbolTable.define();} 'in' var1=expr{Tools.checkArrayOfForeach($var1.return_type,$foreachToken.getLine());} NL statements 'end' NL{endScope();};
 
 stm_quit: 'quit' NL;
 
@@ -280,10 +280,6 @@ expr_other
                 SymbolTableVariableItemBase var = (SymbolTableVariableItemBase) item;
                 print($id.line + ") Variable " + $id.text + " used.\t\t" +   "Base Reg: " + var.getBaseRegister() + ", Offset: " + var.getOffset());
 								$return_type = var.getVariable().getType();
-								if (var.isLvalue())
-								print("L e");
-								else
-									print("nist");
 								$isLvalue = var.isLvalue();
 						}
   }

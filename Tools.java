@@ -196,4 +196,10 @@ public class Tools {
       System.out.println("line"+line+": Left side of assignment is not lvalue");
     }
   }
+  static void checkArrayOfForeach(Type type1, int line){
+    if (!(type1 instanceof ArrayType) && !(type1 instanceof NoType)){
+      pass2Error = true;
+      System.out.println("line"+line+": foreach parameter is not iterable");
+    }
+  }
 }
