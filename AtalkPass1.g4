@@ -61,7 +61,6 @@ actor:
 		{Tools.oneActorDefined = true;
 			SymbolTableActorItem item = SymbolTable.top.getActor($name.text);
 			if (item != null){
-				System.out.println("actor found");
 				item.setSymbolTable(SymbolTable.top);
 			}
 			endScope();
@@ -131,7 +130,7 @@ type returns [Type return_type]:{ArrayList <Integer> sizes = new ArrayList<Integ
 			 for (int i = sizes.size()-1; i >= 0; i--){
 				 $return_type = new ArrayType($return_type,sizes.get(i));
 		 		}
-				 System.out.println("Now type is " + $return_type.toString());
+				 
 			 } 
 | {ArrayList <Integer> sizes = new ArrayList<Integer>();} 'int'  {$return_type = IntType.getInstance();}  ('[' size=CONST_NUM {
 			int size = Integer.parseInt($size.text);
@@ -144,9 +143,7 @@ type returns [Type return_type]:{ArrayList <Integer> sizes = new ArrayList<Integ
 			}
 		 ']')* 	
 		 {
-				 System.out.println("b");
 			 for (int i = sizes.size()-1; i >= 0; i--){
-				 System.out.println("a");
 				 $return_type = new ArrayType($return_type,sizes.get(i));
 		 		}
 		 }
@@ -208,8 +205,11 @@ stm_if_elseif_else[boolean foreach]:
 	;
 
 stm_foreach[boolean foreach]:
-		'foreach' ID 'in' expr NL
-			{beginScope();}statements[true]{endScope();}
+		'foreach' id=ID 'in' expr NL
+			{
+				beginScope();
+				Tools.putLocalVar($id.text,NoType.getInstance());
+			}statements[true]{endScope();}
 		'end' NL
 	;
 

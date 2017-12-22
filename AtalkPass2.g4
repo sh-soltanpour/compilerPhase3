@@ -123,7 +123,7 @@ stm_if_elseif_else:
 		'else' NL statements
 	)? 'end' NL;
 
-stm_foreach: 'foreach' ID 'in' expr NL statements 'end' NL;
+stm_foreach: 'foreach' ID {SymbolTable.define();} 'in' expr NL statements 'end' NL;
 
 stm_quit: 'quit' NL;
 
